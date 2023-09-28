@@ -16,7 +16,7 @@ type Masker struct {
 	stringFunc StringFunc
 }
 
-// NewMasker create a Masker
+// NewMasker create a Masker instance
 func NewMasker(opts ...Option) *Masker {
 	masker := &Masker{
 		mask:      string(PStar),
@@ -28,8 +28,8 @@ func NewMasker(opts ...Option) *Masker {
 	return masker
 }
 
-// WithMarkTypes .
-func WithMarkTypes(markType []MType) Option {
+// WithMarkTypes adds your custom mark types
+func WithMarkTypes(markType ...MType) Option {
 	return func(o *Masker) {
 		for _, nt := range markType {
 			for _, ot := range o.maskTypes {
@@ -42,14 +42,14 @@ func WithMarkTypes(markType []MType) Option {
 	}
 }
 
-// WithStringFunc .
+// WithStringFunc sets the stringFunc
 func WithStringFunc(f StringFunc) Option {
 	return func(o *Masker) {
 		o.stringFunc = f
 	}
 }
 
-// MarkTypes .
+// MarkTypes returns available mark types
 func (m *Masker) MarkTypes() []MType {
 	return m.maskTypes
 }
