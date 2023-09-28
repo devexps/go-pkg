@@ -4,6 +4,7 @@ type MType string
 
 const (
 	MSecret    MType = "secret"
+	MID        MType = "id"
 	MName      MType = "name"
 	MPassword  MType = "password"
 	MAddress   MType = "address"

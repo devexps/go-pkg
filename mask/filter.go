@@ -20,7 +20,7 @@ type Filter interface {
 	// The field name of the value to be checked, and tag value if the structure has `zlog` tag will be passed as arguments.
 	// If the return value is false, nothing is done; if it is true, the entire field is hidden.
 	// Hidden values will be replaced with the value "[filtered]" if string type.
-	ShouldMask(fieldName string, tag string) bool
+	ShouldMask(fieldName string, value interface{}, tag string) bool
 }
 
 type Filters []Filter
@@ -42,18 +42,18 @@ func (fs Filters) MaskString(s string) string {
 }
 
 // ShouldMask .
-func (fs Filters) ShouldMask(fieldName string, tag string) bool {
+func (fs Filters) ShouldMask(fieldName string, value interface{}, tag string) bool {
 	for _, f := range fs {
-		if f.ShouldMask(fieldName, tag) {
+		if f.ShouldMask(fieldName, value, tag) {
 			return true
 		}
 	}
 	return false
 }
 
-func checkShouldMask(fs Filters, fieldName string, tag string) (Filter, bool) {
+func checkShouldMask(fs Filters, fieldName string, value interface{}, tag string) (Filter, bool) {
 	for _, f := range fs {
-		if f.ShouldMask(fieldName, tag) {
+		if f.ShouldMask(fieldName, value, tag) {
 			return f, true
 		}
 	}

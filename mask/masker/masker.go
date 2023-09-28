@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type StringFunc func(t MType, i string) (bool, string)
+type StringFunc func(t MType, s string) (bool, string)
 
 type Option func(o *Masker)
 
@@ -20,7 +20,7 @@ type Masker struct {
 func NewMasker(opts ...Option) *Masker {
 	masker := &Masker{
 		mask:      string(PStar),
-		maskTypes: []MType{MSecret, MName, MPassword, MAddress, MEmail, MMobile, MTelephone, MURL},
+		maskTypes: []MType{MSecret, MID, MName, MPassword, MAddress, MEmail, MMobile, MTelephone, MURL},
 	}
 	for _, opt := range opts {
 		opt(masker)
@@ -55,30 +55,45 @@ func (m *Masker) MarkTypes() []MType {
 }
 
 // String mask input string of the mask type
-func (m *Masker) String(t MType, i string, defaultFiltered string) string {
+func (m *Masker) String(t MType, s string, defaultFiltered string) string {
 	if m.stringFunc != nil {
-		if b, o := m.stringFunc(t, i); b {
+		if b, o := m.stringFunc(t, s); b {
 			return o
 		}
 	}
 	switch t {
+	case MID:
+		return m.ID(s)
 	case MName:
-		return m.Name(i)
+		return m.Name(s)
 	case MPassword:
-		return m.Password(i)
+		return m.Password(s)
 	case MAddress:
-		return m.Address(i)
+		return m.Address(s)
 	case MEmail:
-		return m.Email(i)
+		return m.Email(s)
 	case MMobile:
-		return m.Mobile(i)
+		return m.Mobile(s)
 	case MTelephone:
-		return m.Telephone(i)
+		return m.Telephone(s)
 	case MURL:
-		return m.URL(i)
+		return m.URL(s)
 	default:
 		return defaultFiltered
 	}
+}
+
+// ID mask last 4 digits of ID number
+//
+// Example:
+//   input: ABC123456789
+//   output: ABC12345****
+func (m *Masker) ID(i string) string {
+	l := len([]rune(i))
+	if l == 0 {
+		return ""
+	}
+	return m.overlay(i, strLoop(m.mask, len("****")), 6, l)
 }
 
 // Name mask the second letter and the third letter
@@ -86,13 +101,13 @@ func (m *Masker) String(t MType, i string, defaultFiltered string) string {
 // Example:
 //   input: ABCD
 //   output: A**D
-func (m *Masker) Name(i string) string {
-	l := len([]rune(i))
+func (m *Masker) Name(s string) string {
+	l := len([]rune(s))
 	if l == 0 {
 		return ""
 	}
 	// if it has space
-	if strs := strings.Split(i, " "); len(strs) > 1 {
+	if strs := strings.Split(s, " "); len(strs) > 1 {
 		tmp := make([]string, len(strs))
 		for idx, str := range strs {
 			tmp[idx] = m.Name(str)
@@ -100,17 +115,17 @@ func (m *Masker) Name(i string) string {
 		return strings.Join(tmp, " ")
 	}
 	if l == 2 || l == 3 {
-		return m.overlay(i, strLoop(m.mask, len("**")), 1, 2)
+		return m.overlay(s, strLoop(m.mask, len("**")), 1, 2)
 	}
 	if l > 3 {
-		return m.overlay(i, strLoop(m.mask, len("**")), 1, 3)
+		return m.overlay(s, strLoop(m.mask, len("**")), 1, 3)
 	}
 	return strLoop(m.mask, len("**"))
 }
 
 // Password always return "************"
-func (m *Masker) Password(i string) string {
-	l := len([]rune(i))
+func (m *Masker) Password(s string) string {
+	l := len([]rune(s))
 	if l == 0 {
 		return ""
 	}
@@ -122,8 +137,8 @@ func (m *Masker) Password(i string) string {
 // Example:
 //   input: Cecilia Chapman 711-2880 Nulla St. Mankato Mississippi 96522
 //   output: Cecili******
-func (m *Masker) Address(i string) string {
-	l := len([]rune(i))
+func (m *Masker) Address(s string) string {
+	l := len([]rune(s))
 	if l == 0 {
 		return ""
 	}
@@ -131,7 +146,7 @@ func (m *Masker) Address(i string) string {
 	if l <= n {
 		return strLoop(m.mask, len("******"))
 	}
-	return m.overlay(i, strLoop(m.mask, len("******")), n, math.MaxInt64)
+	return m.overlay(s, strLoop(m.mask, len("******")), n, math.MaxInt64)
 }
 
 // Email keep domain and the first 3 letters
@@ -139,23 +154,21 @@ func (m *Masker) Address(i string) string {
 // Example:
 //   input: abcd.company@gmail.com
 //   output: abc****@gmail.com
-func (m *Masker) Email(i string) string {
-	l := len([]rune(i))
+func (m *Masker) Email(s string) string {
+	l := len([]rune(s))
 	if l == 0 {
 		return ""
 	}
-	tmp := strings.Split(i, "@")
+	tmp := strings.Split(s, "@")
 
 	switch len(tmp) {
-	case 0:
-		return ""
-	case 1:
-		return m.overlay(i, strLoop(m.mask, len("****")), 3, len(tmp[0]))
+	case 0, 1:
+		return m.overlay(s, strLoop(m.mask, len("****")), 3, 7)
 	}
 	addr := tmp[0]
 	domain := tmp[1]
 
-	addr = m.overlay(addr, strLoop(m.mask, len("****")), 3, len(tmp[0]))
+	addr = m.overlay(addr, strLoop(m.mask, len("****")), 3, 7)
 	return addr + "@" + domain
 }
 
@@ -164,11 +177,11 @@ func (m *Masker) Email(i string) string {
 // Example:
 //   input: 0987654321
 //   output: 0987***321
-func (m *Masker) Mobile(i string) string {
-	if len(i) == 0 {
+func (m *Masker) Mobile(s string) string {
+	if len(s) == 0 {
 		return ""
 	}
-	return m.overlay(i, strLoop(m.mask, len("***")), 4, 7)
+	return m.overlay(s, strLoop(m.mask, len("***")), 4, 7)
 }
 
 // Telephone remove "(", ")", " ", "-" chart, and mask last 4 digits of telephone number, format to "(??)????-****"
@@ -176,30 +189,30 @@ func (m *Masker) Mobile(i string) string {
 // Example:
 //   input: 0287654321
 //   output: (02)8765-****"
-func (m *Masker) Telephone(i string) string {
-	l := len([]rune(i))
+func (m *Masker) Telephone(s string) string {
+	l := len([]rune(s))
 	if l == 0 {
 		return ""
 	}
-	i = strings.Replace(i, " ", "", -1)
-	i = strings.Replace(i, "(", "", -1)
-	i = strings.Replace(i, ")", "", -1)
-	i = strings.Replace(i, "-", "", -1)
+	s = strings.Replace(s, " ", "", -1)
+	s = strings.Replace(s, "(", "", -1)
+	s = strings.Replace(s, ")", "", -1)
+	s = strings.Replace(s, "-", "", -1)
 
-	l = len([]rune(i))
+	l = len([]rune(s))
 
 	if l != 10 && l != 8 {
-		return i
+		return s
 	}
 	ans := ""
 
 	if l == 10 {
 		ans += "("
-		ans += i[:2]
+		ans += s[:2]
 		ans += ")"
-		i = i[2:]
+		s = s[2:]
 	}
-	ans += i[:4]
+	ans += s[:4]
 	ans += "-"
 	ans += "****"
 
@@ -211,10 +224,10 @@ func (m *Masker) Telephone(i string) string {
 // Example:
 //   input: http://admin:mysecretpassword@localhost:1234/uri
 //   output:http://admin:xxxxx@localhost:1234/uri
-func (m *Masker) URL(i string) string {
-	u, err := url.Parse(i)
+func (m *Masker) URL(s string) string {
+	u, err := url.Parse(s)
 	if err != nil {
-		return i
+		return s
 	}
 	return u.Redacted()
 }

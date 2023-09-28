@@ -38,6 +38,6 @@ func (f *regexFilter) MaskString(s string) string {
 }
 
 // ShouldMask .
-func (f *regexFilter) ShouldMask(fieldName string, tag string) bool {
+func (f *regexFilter) ShouldMask(fieldName string, value interface{}, tag string) bool {
 	return false
 }

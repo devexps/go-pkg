@@ -31,6 +31,6 @@ func (f *fieldFilter) MaskString(s string) string {
 }
 
 // ShouldMask .
-func (f *fieldFilter) ShouldMask(fieldName string, tag string) bool {
+func (f *fieldFilter) ShouldMask(fieldName string, value interface{}, tag string) bool {
 	return f.fieldName == fieldName
 }

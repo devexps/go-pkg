@@ -33,6 +33,6 @@ func (f *fieldPrefixFilter) MaskString(s string) string {
 }
 
 // ShouldMask .
-func (f *fieldPrefixFilter) ShouldMask(fieldName string, tag string) bool {
+func (f *fieldPrefixFilter) ShouldMask(fieldName string, value interface{}, tag string) bool {
 	return strings.HasPrefix(fieldName, f.prefix)
 }

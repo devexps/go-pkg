@@ -57,7 +57,7 @@ func (m *masking) clone(fieldName string, value reflect.Value, tag string) refle
 	}
 	var dst reflect.Value
 
-	maskingFilter, shouldMask := checkShouldMask(m.filters, fieldName, tag)
+	maskingFilter, shouldMask := checkShouldMask(m.filters, fieldName, src.Interface(), tag)
 	if shouldMask {
 		dst = reflect.New(src.Type())
 		switch src.Kind() {

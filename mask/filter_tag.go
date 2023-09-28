@@ -37,7 +37,7 @@ func (f *tagFilter) MaskString(s string) string {
 }
 
 // ShouldMask .
-func (f *tagFilter) ShouldMask(fieldName string, tag string) bool {
+func (f *tagFilter) ShouldMask(fieldName string, value interface{}, tag string) bool {
 	for _, stag := range f.secureTags {
 		if stag == tag {
 			f.maskType = masker.MType(tag)
