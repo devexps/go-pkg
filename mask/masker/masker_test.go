@@ -24,7 +24,7 @@ func TestMasker_MaskerOption(t *testing.T) {
 	s1 := customMasker.String(MSecret, "abcdefg123456")
 	assert.Equal(t, "[removed]", s1)
 
-	assert.Equal(t, 9, len(customMasker.MarkTypes()))
+	assert.Equal(t, 10, len(customMasker.MarkTypes()))
 }
 
 func TestMasker_String(t *testing.T) {
@@ -121,6 +121,15 @@ func TestMasker_String(t *testing.T) {
 				s: "http://admin:mysecretpassword@localhost:1234/uri",
 			},
 			want: "http://admin:xxxxx@localhost:1234/uri",
+		},
+		{
+			name:   "CreditCard",
+			masker: defaultMasker,
+			args: args{
+				t: MCreditCard,
+				s: "1234567890123456",
+			},
+			want: "123456******3456",
 		},
 		{
 			name:   "Custom MTest",

@@ -22,7 +22,7 @@ func NewMasker(opts ...Option) *Masker {
 	masker := &Masker{
 		maskingCharacter: string(PStar),
 		filteredLabel:    DefaultFilteredLabel,
-		maskTypes:        []MType{MSecret, MID, MName, MPassword, MAddress, MEmail, MMobile, MTelephone, MURL},
+		maskTypes:        []MType{MSecret, MID, MName, MPassword, MAddress, MEmail, MMobile, MTelephone, MURL, MCreditCard},
 	}
 	for _, opt := range opts {
 		opt(masker)
@@ -94,6 +94,8 @@ func (m *Masker) String(t MType, s string) string {
 		return m.Telephone(s)
 	case MURL:
 		return m.URL(s)
+	case MCreditCard:
+		return m.CreditCard(s)
 	default:
 		return m.filteredLabel
 	}
@@ -246,6 +248,21 @@ func (m *Masker) URL(s string) string {
 		return s
 	}
 	return u.Redacted()
+}
+
+// CreditCard mask 6 digits from the 7'th digit
+//
+// Example:
+//   input1: 1234567890123456 (VISA, JCB, MasterCard)(len = 16)
+//   output1: 123456******3456
+//   input2: 123456789012345` (American Express)(len = 15)
+//   output2: 123456******345`
+func (m *Masker) CreditCard(i string) string {
+	l := len([]rune(i))
+	if l == 0 {
+		return ""
+	}
+	return m.overlay(i, strLoop(m.maskingCharacter, len("******")), 6, 12)
 }
 
 func (m *Masker) overlay(str string, overlay string, start int, end int) (overlayed string) {
