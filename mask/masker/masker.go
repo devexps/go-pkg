@@ -11,16 +11,18 @@ type StringFunc func(t MType, s string) (bool, string)
 type Option func(o *Masker)
 
 type Masker struct {
-	mask       string
-	maskTypes  []MType
-	stringFunc StringFunc
+	maskingCharacter string
+	filteredLabel    string
+	maskTypes        []MType
+	stringFunc       StringFunc
 }
 
 // NewMasker create a Masker instance
 func NewMasker(opts ...Option) *Masker {
 	masker := &Masker{
-		mask:      string(PStar),
-		maskTypes: []MType{MSecret, MID, MName, MPassword, MAddress, MEmail, MMobile, MTelephone, MURL},
+		maskingCharacter: string(PStar),
+		filteredLabel:    DefaultFilteredLabel,
+		maskTypes:        []MType{MSecret, MID, MName, MPassword, MAddress, MEmail, MMobile, MTelephone, MURL},
 	}
 	for _, opt := range opts {
 		opt(masker)
@@ -31,7 +33,14 @@ func NewMasker(opts ...Option) *Masker {
 // WithMaskingCharacter sets the custom masking character
 func WithMaskingCharacter(mask string) Option {
 	return func(o *Masker) {
-		o.mask = mask
+		o.maskingCharacter = mask
+	}
+}
+
+// WithFilteredLabel sets the custom filtered label
+func WithFilteredLabel(label string) Option {
+	return func(o *Masker) {
+		o.filteredLabel = label
 	}
 }
 
@@ -62,7 +71,7 @@ func (m *Masker) MarkTypes() []MType {
 }
 
 // String mask input string of the mask type
-func (m *Masker) String(t MType, s string, defaultFiltered string) string {
+func (m *Masker) String(t MType, s string) string {
 	if m.stringFunc != nil {
 		if b, o := m.stringFunc(t, s); b {
 			return o
@@ -86,7 +95,7 @@ func (m *Masker) String(t MType, s string, defaultFiltered string) string {
 	case MURL:
 		return m.URL(s)
 	default:
-		return defaultFiltered
+		return m.filteredLabel
 	}
 }
 
@@ -100,7 +109,7 @@ func (m *Masker) ID(i string) string {
 	if l == 0 {
 		return ""
 	}
-	return m.overlay(i, strLoop(m.mask, len("****")), 6, l)
+	return m.overlay(i, strLoop(m.maskingCharacter, len("****")), 6, l)
 }
 
 // Name mask the second letter and the third letter
@@ -122,12 +131,12 @@ func (m *Masker) Name(s string) string {
 		return strings.Join(tmp, " ")
 	}
 	if l == 2 || l == 3 {
-		return m.overlay(s, strLoop(m.mask, len("**")), 1, 2)
+		return m.overlay(s, strLoop(m.maskingCharacter, len("**")), 1, 2)
 	}
 	if l > 3 {
-		return m.overlay(s, strLoop(m.mask, len("**")), 1, 3)
+		return m.overlay(s, strLoop(m.maskingCharacter, len("**")), 1, 3)
 	}
-	return strLoop(m.mask, len("**"))
+	return strLoop(m.maskingCharacter, len("**"))
 }
 
 // Password always return "************"
@@ -136,7 +145,7 @@ func (m *Masker) Password(s string) string {
 	if l == 0 {
 		return ""
 	}
-	return strLoop(m.mask, len("************"))
+	return strLoop(m.maskingCharacter, len("************"))
 }
 
 // Address keep first 6 letters, mask the rest
@@ -151,9 +160,9 @@ func (m *Masker) Address(s string) string {
 	}
 	n := 6
 	if l <= n {
-		return strLoop(m.mask, len("******"))
+		return strLoop(m.maskingCharacter, len("******"))
 	}
-	return m.overlay(s, strLoop(m.mask, len("******")), n, math.MaxInt64)
+	return m.overlay(s, strLoop(m.maskingCharacter, len("******")), n, math.MaxInt64)
 }
 
 // Email keep domain and the first 3 letters
@@ -170,12 +179,12 @@ func (m *Masker) Email(s string) string {
 
 	switch len(tmp) {
 	case 0, 1:
-		return m.overlay(s, strLoop(m.mask, len("****")), 3, 7)
+		return m.overlay(s, strLoop(m.maskingCharacter, len("****")), 3, 7)
 	}
 	addr := tmp[0]
 	domain := tmp[1]
 
-	addr = m.overlay(addr, strLoop(m.mask, len("****")), 3, 7)
+	addr = m.overlay(addr, strLoop(m.maskingCharacter, len("****")), 3, 7)
 	return addr + "@" + domain
 }
 
@@ -188,7 +197,7 @@ func (m *Masker) Mobile(s string) string {
 	if len(s) == 0 {
 		return ""
 	}
-	return m.overlay(s, strLoop(m.mask, len("***")), 4, 7)
+	return m.overlay(s, strLoop(m.maskingCharacter, len("***")), 4, 7)
 }
 
 // Telephone remove "(", ")", " ", "-" chart, and mask last 4 digits of telephone number, format to "(??)????-****"

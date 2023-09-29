@@ -27,7 +27,7 @@ func RegexFilter(regexPattern string, maskTypes ...masker.MType) Filter {
 // ReplaceString .
 func (f *regexFilter) ReplaceString(s string) string {
 	for _, p := range f.regexList {
-		s = p.ReplaceAllString(s, maskerInstance.String(f.maskType, s, filteredLabel))
+		s = p.ReplaceAllString(s, maskerInstance.String(f.maskType, s))
 	}
 	return s
 }

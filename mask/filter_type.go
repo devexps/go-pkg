@@ -29,7 +29,7 @@ func (f *typeFilter) ReplaceString(s string) string {
 
 // MaskString .
 func (f *typeFilter) MaskString(s string) string {
-	return maskerInstance.String(f.maskType, s, filteredLabel)
+	return maskerInstance.String(f.maskType, s)
 }
 
 // ShouldMask .

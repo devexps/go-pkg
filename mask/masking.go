@@ -8,17 +8,11 @@ import (
 
 var (
 	maskerInstance = masker.NewMasker()
-	filteredLabel  = "[filtered]"
 )
 
 // SetMasker sets a custom masker instance
 func SetMasker(masker *masker.Masker) {
 	maskerInstance = masker
-}
-
-// SetFilteredLabel set a custom filtered label
-func SetFilteredLabel(label string) {
-	filteredLabel = label
 }
 
 type Masking interface {

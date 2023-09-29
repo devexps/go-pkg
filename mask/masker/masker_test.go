@@ -6,8 +6,6 @@ import (
 )
 
 var (
-	filteredLabel = "[filtered]"
-
 	MTest   = MType("test")
 	StrFunc = func(t MType, s string) (bool, string) {
 		if t == MTest {
@@ -18,9 +16,14 @@ var (
 )
 
 func TestMasker_MaskerOption(t *testing.T) {
-	customMasker := NewMasker(WithMaskingCharacter("#"))
-	s := customMasker.String(MPassword, "123456", filteredLabel)
+	customMasker := NewMasker(WithMaskingCharacter("#"), WithFilteredLabel("[removed]"))
+
+	s := customMasker.String(MPassword, "123456")
 	assert.Equal(t, "############", s)
+
+	s1 := customMasker.String(MSecret, "abcdefg123456")
+	assert.Equal(t, "[removed]", s1)
+
 	assert.Equal(t, 9, len(customMasker.MarkTypes()))
 }
 
@@ -31,6 +34,7 @@ func TestMasker_String(t *testing.T) {
 	}
 	defaultMasker := NewMasker()
 	customMasker := NewMasker(WithMarkTypes(MName, MTest), WithStringFunc(StrFunc))
+
 	tests := []struct {
 		name   string
 		masker *Masker
@@ -44,7 +48,7 @@ func TestMasker_String(t *testing.T) {
 				t: MType(""),
 				s: "abcdefghi",
 			},
-			want: filteredLabel,
+			want: DefaultFilteredLabel,
 		},
 		{
 			name:   "ID",
@@ -130,7 +134,7 @@ func TestMasker_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.masker.String(tt.args.t, tt.args.s, filteredLabel); got != tt.want {
+			if got := tt.masker.String(tt.args.t, tt.args.s); got != tt.want {
 				t.Errorf("Masker.String() = %v, want %v", got, tt.want)
 			}
 		})
@@ -145,6 +149,7 @@ func TestMasker_overlay(t *testing.T) {
 		end     int
 	}
 	defaultMasker := NewMasker()
+
 	tests := []struct {
 		name          string
 		masker        *Masker

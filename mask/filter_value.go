@@ -24,7 +24,7 @@ func ValueFilter(target string, maskTypes ...masker.MType) Filter {
 
 // ReplaceString .
 func (f *valueFilter) ReplaceString(s string) string {
-	return strings.ReplaceAll(s, f.value, maskerInstance.String(f.maskType, s, filteredLabel))
+	return strings.ReplaceAll(s, f.value, maskerInstance.String(f.maskType, s))
 }
 
 // MaskString .

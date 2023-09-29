@@ -33,7 +33,7 @@ func (f *tagFilter) ReplaceString(s string) string { return s }
 
 // MaskString .
 func (f *tagFilter) MaskString(s string) string {
-	return maskerInstance.String(f.maskType, s, filteredLabel)
+	return maskerInstance.String(f.maskType, s)
 }
 
 // ShouldMask .

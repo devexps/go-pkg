@@ -27,7 +27,7 @@ func (f *fieldFilter) ReplaceString(s string) string {
 
 // MaskString .
 func (f *fieldFilter) MaskString(s string) string {
-	return maskerInstance.String(f.maskType, s, filteredLabel)
+	return maskerInstance.String(f.maskType, s)
 }
 
 // ShouldMask .

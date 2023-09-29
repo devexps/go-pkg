@@ -29,7 +29,7 @@ func (f *fieldPrefixFilter) ReplaceString(s string) string {
 
 // MaskString .
 func (f *fieldPrefixFilter) MaskString(s string) string {
-	return maskerInstance.String(f.maskType, s, filteredLabel)
+	return maskerInstance.String(f.maskType, s)
 }
 
 // ShouldMask .

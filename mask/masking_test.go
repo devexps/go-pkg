@@ -48,7 +48,7 @@ func TestTagFilter(t *testing.T) {
 		require.True(t, ok)
 		require.NotNil(t, copied)
 		assert.Equal(t, "dum****@dummy.com", copied.EMail)
-		assert.Equal(t, filteredLabel, copied.Token)
+		assert.Equal(t, masker.DefaultFilteredLabel, copied.Token)
 		assert.Equal(t, record.ID, copied.ID)
 	})
 }
@@ -71,7 +71,7 @@ func TestFieldFilter(t *testing.T) {
 		copied, ok := filteredData.(myRecord)
 		require.True(t, ok)
 		require.NotNil(t, copied)
-		assert.Equal(t, filteredLabel, copied.Phone)
+		assert.Equal(t, masker.DefaultFilteredLabel, copied.Phone)
 		assert.Equal(t, "abc****@gmail.com", copied.Email)
 		assert.Equal(t, record.ID, copied.ID)
 	})
@@ -121,7 +121,7 @@ func TestFieldRegexFilter(t *testing.T) {
 		copied, ok := filteredData.(myRecord)
 		require.True(t, ok)
 		require.NotNil(t, copied)
-		assert.Equal(t, filteredLabel, copied.Link)
+		assert.Equal(t, masker.DefaultFilteredLabel, copied.Link)
 		assert.Equal(t, record.Link1, copied.Link1)
 		assert.Equal(t, record.ID, copied.ID)
 	})
@@ -171,7 +171,7 @@ func TestValueFilter(t *testing.T) {
 			require.True(t, ok)
 			require.NotNil(t, copied)
 			assert.Equal(t, record.ID, copied.ID)
-			assert.Equal(t, filteredLabel, copied.Data)
+			assert.Equal(t, masker.DefaultFilteredLabel, copied.Data)
 		})
 		t.Run("array", func(t *testing.T) {
 			record := []string{
@@ -181,7 +181,7 @@ func TestValueFilter(t *testing.T) {
 			}
 			filteredData := maskTool.Apply(record)
 			require.NotNil(t, filteredData)
-			assert.Equal(t, []string([]string{"userId", "data", filteredLabel}), filteredData)
+			assert.Equal(t, []string([]string{"userId", "data", masker.DefaultFilteredLabel}), filteredData)
 		})
 		t.Run("map", func(*testing.T) {
 			mapRecord := map[string]interface{}{
@@ -221,7 +221,7 @@ func TestValueFilter(t *testing.T) {
 			copied, ok := v.(testData)
 			require.True(t, ok)
 			require.NotNil(t, copied)
-			assert.Equal(t, filteredLabel, copied.Name)
+			assert.Equal(t, masker.DefaultFilteredLabel, copied.Name)
 			assert.Equal(t, "five", copied.Label)
 		})
 		t.Run("original data is not modified when filtered", func(t *testing.T) {
@@ -235,7 +235,7 @@ func TestValueFilter(t *testing.T) {
 			copied, ok := v.(*testData)
 			require.True(t, ok)
 			require.NotNil(t, copied)
-			assert.Equal(t, filteredLabel, copied.Name)
+			assert.Equal(t, masker.DefaultFilteredLabel, copied.Name)
 			assert.Equal(t, "blue", data.Name)
 			assert.Equal(t, "five", data.Label)
 			assert.Equal(t, "five", copied.Label)
@@ -256,7 +256,7 @@ func TestValueFilter(t *testing.T) {
 			copied, ok := v.(*testDataParent)
 			require.True(t, ok)
 			require.NotNil(t, copied)
-			assert.Equal(t, filteredLabel, copied.Child.Name)
+			assert.Equal(t, masker.DefaultFilteredLabel, copied.Child.Name)
 			assert.Equal(t, "five", copied.Child.Label)
 		})
 		t.Run("map data", func(t *testing.T) {
@@ -271,7 +271,7 @@ func TestValueFilter(t *testing.T) {
 			copied, ok := v.(map[string]*testData)
 			require.True(t, ok)
 			require.NotNil(t, copied)
-			assert.Equal(t, filteredLabel, copied["xyz"].Name)
+			assert.Equal(t, masker.DefaultFilteredLabel, copied["xyz"].Name)
 			assert.Equal(t, "five", copied["xyz"].Label)
 		})
 		t.Run("array data with ptr", func(t *testing.T) {
@@ -291,7 +291,7 @@ func TestValueFilter(t *testing.T) {
 			require.True(t, ok)
 			require.NotNil(t, copied)
 			assert.Equal(t, "orange", copied[0].Name)
-			assert.Equal(t, filteredLabel, copied[1].Name)
+			assert.Equal(t, masker.DefaultFilteredLabel, copied[1].Name)
 			assert.Equal(t, "five", copied[1].Label)
 		})
 	})
@@ -340,7 +340,7 @@ func TestTypeFilter(t *testing.T) {
 			copied, ok := filteredData.(myRecord)
 			require.True(t, ok)
 			require.NotNil(t, copied)
-			assert.Equal(t, password(filteredLabel), copied.Password)
+			assert.Equal(t, password(masker.DefaultFilteredLabel), copied.Password)
 			assert.Equal(t, array(nil), copied.Ages)
 			assert.Equal(t, record.ID, copied.ID)
 		})

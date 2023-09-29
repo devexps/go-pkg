@@ -12,6 +12,8 @@ const (
 	MMobile    MType = "mobile"
 	MTelephone MType = "telephone"
 	MURL       MType = "URL"
+
+	DefaultFilteredLabel = "[filtered]"
 )
 
 type MaskingCharacter string
