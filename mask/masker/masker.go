@@ -28,6 +28,13 @@ func NewMasker(opts ...Option) *Masker {
 	return masker
 }
 
+// WithMaskingCharacter sets the custom masking character
+func WithMaskingCharacter(mask string) Option {
+	return func(o *Masker) {
+		o.mask = mask
+	}
+}
+
 // WithMarkTypes adds your custom mark types
 func WithMarkTypes(markType ...MType) Option {
 	return func(o *Masker) {

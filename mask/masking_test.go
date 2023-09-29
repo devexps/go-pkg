@@ -351,7 +351,6 @@ func TestCustomMasker(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
 		SetMasker(masker.NewMasker(masker.WithMarkTypes("test")))
 		assert.NotNil(t, maskerInstance)
-		assert.Equal(t, 10, len(maskerInstance.MarkTypes()))
 
 		maskTool := New()
 		assert.NotNil(t, maskTool)

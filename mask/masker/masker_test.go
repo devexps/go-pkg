@@ -1,6 +1,9 @@
 package masker
 
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
 var (
 	filteredLabel = "[filtered]"
@@ -13,6 +16,13 @@ var (
 		return false, ""
 	}
 )
+
+func TestMasker_MaskerOption(t *testing.T) {
+	customMasker := NewMasker(WithMaskingCharacter("#"))
+	s := customMasker.String(MPassword, "123456", filteredLabel)
+	assert.Equal(t, "############", s)
+	assert.Equal(t, 9, len(customMasker.MarkTypes()))
+}
 
 func TestMasker_String(t *testing.T) {
 	type args struct {

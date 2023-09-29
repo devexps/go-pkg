@@ -1,9 +1,5 @@
 package mask
 
-const (
-	filteredLabel = "[filtered]"
-)
-
 type Filter interface {
 	// ReplaceString is called when checking string type.
 	// The argument is the value to be checked, and the return value should be the value to be replaced.
