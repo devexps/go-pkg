@@ -18,6 +18,9 @@ func TagsFilter() Filter {
 
 // TagFilter creates a new filter with multiple tags input
 func TagFilter(tags ...masker.MType) Filter {
+	if len(tags) == 0 {
+		tags = []masker.MType{masker.MSecret}
+	}
 	var secureTags []string
 
 	for _, tag := range tags {

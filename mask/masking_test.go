@@ -26,7 +26,7 @@ func TestTagFilter(t *testing.T) {
 		copied, ok := filteredData.(myRecord)
 		require.True(t, ok)
 		require.NotNil(t, copied)
-		assert.Equal(t, record.EMail, copied.EMail)
+		assert.Equal(t, masker.DefaultFilteredLabel, *copied.EMail)
 		assert.Equal(t, record.ID, copied.ID)
 	})
 
